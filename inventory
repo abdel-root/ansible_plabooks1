@@ -1,3 +1,9 @@
+node1 192.168.1.13 node1.example.com
+node2 192.168.1.18 node2.example.com
+node4 192.168.1.6 node4.example.com
+node3 192.168.1.78 node3.example.com
+node5 192.168.1.64 node5.example.com
+
 [dev]
 node1
 
