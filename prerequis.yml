@@ -1,0 +1,22 @@
+---
+- hosts: prod
+  become: yes
+  tasks:
+    - yum:
+       name: httpd
+       state: present
+    - firewalld:
+       service: http
+       state: enabled
+       permanent: yes
+    - firewalld:
+       port: 80/tcp
+       state: enabled
+       permanent: yes
+
+    - service:
+       name: "{{item}}"
+       state: restarted
+      loop:
+       - httpd
+       - firewalld

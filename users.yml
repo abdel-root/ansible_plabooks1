@@ -1,0 +1,30 @@
+---
+- hosts: all
+  become: yes
+  vars_files:
+    - userslist.yml
+    - lock.yml
+  tasks:
+    - group:
+       name: devops
+       state: present
+      when: inventory_hostname in groups['dev']
+    - group:
+       name: managers
+       state: present
+      when: inventory_hostname in groups['prod']
+
+    - user:
+       name: "{{item.username}}"
+       groups: devops
+       password: "{{ pw_dev |  password_hash('sha256') }}"
+      when: inventory_hostname in groups['dev'] and item.job == "developers"
+      loop: "{{users}}"
+
+    - user:
+       name: "{{item.username}}"
+       groups: prod
+       password: "{{ pw_mgr | password_hash('sha256')  }}"
+      when: inventory_hostname in groups['prod'] and item.job == "prod"
+      loop: "{{users}}"
+

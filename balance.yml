@@ -1,0 +1,41 @@
+---
+- hosts: all
+  become: yes
+  tasks:
+   - include_role:
+       name: balancer
+     vars:
+
+      haproxy_backend_name: 'habackend'
+      haproxy_backend_mode: 'http'
+      haproxy_backend_balance_method: 'roundrobin'
+      haproxy_backend_httpchk: 'HEAD / HTTP/1.1\r\nHost:localhost'
+
+
+      haproxy_backend_servers:
+       - name: app1
+         address: 192.168.1.6:80
+       - name: app2
+         address: 192.168.1.64:80
+     when: inventory_hostname in groups['proxy']
+   - lineinfile:
+      path: /var/www/html/index.html
+      line: "Welcome to {{ansible_fqdn}} on {{ansible_default_ipv4.address}}" 
+     when: inventory_hostname in groups['prod']
+   - include_role:
+       name: phphello
+     when: inventory_hostname in groups['prod'] 
+   - lineinfile:
+      path: /var/www/html/hello.php
+      line: "Welcome to {{ansible_fqdn}} on {{ansible_default_ipv4.address}}"
+      create: yes
+     when: inventory_hostname in groups['prod']
+   - name: Allow apache to modify files in /srv/git_repos
+     sefcontext:
+      target: '/var/www/hello.php'
+      setype: httpd_sys_rw_content_t
+      state: present
+     when: inventory_hostname in groups['prod']
+   - shell: restorecon -irv /var/www/hello.php
+     when: inventory_hostname in groups['prod']
+ 

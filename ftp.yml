@@ -1,0 +1,10 @@
+---
+- name: Set Default Target to Multi-User for All Nodes
+  hosts: node1
+  become: yes  # This is required to gain root privileges
+
+  tasks:
+    - name: Change default target to multi-user.target
+      systemd:
+        default_set: basic.target
+
